@@ -1,0 +1,7 @@
+(defpackage #:purifier-example (:use #:cl) (:export #:serialized))
+(in-package #:purifier-example)
+(defun serialized ()
+  (with-output-to-string (stream)
+    (yason:with-output (stream)
+      (yason:with-object ()
+        (yason:encode-object-element "answer" 42)))))
