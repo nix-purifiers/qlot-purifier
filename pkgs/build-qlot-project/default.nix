@@ -45,7 +45,7 @@
 }:
 let
   lock = purifier.checkLock (
-    import ./read-lock.nix { inherit lib; } { inherit src lockFile snapshot; }
+    import ../../lib-overlays/default/read-lock.nix { inherit lib; } { inherit src lockFile snapshot; }
   );
   environment = import ./environment.nix {
     inherit
@@ -82,7 +82,7 @@ let
         mkdir -p "$HOME" "$out/source"
         cp -pr ${source}/. "$out/source/"
         chmod -R u+w "$out/source"
-        python3 ${../qlot_purifier/install-setup.py} "$out" ${environment}
+        python3 ${../../qlot_purifier/install-setup.py} "$out" ${environment}
         cd "$out/source"
         ${buildCommand}
         ${lib.optionalString doCheck checkCommand}
