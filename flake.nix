@@ -22,11 +22,11 @@
           nativeQlot = scope.callPackage ./nix/qlot.nix { };
           toolchain = scope.callPackage ./nix/toolchain.nix { };
           sdkVersion = import ./nix/sdk-version.nix { nixpkgsSrc = nixpkgs; };
-          cli = scope.callPackage ./nix/cli.nix {
+          cli = scope.callPackage ./pkgs/qlot-purifier/default.nix {
             nixpkgsSrc = nixpkgs;
             purifierSrc = purifier;
           };
-          buildQlotProject = scope.callPackage ./nix/build-project.nix {
+          buildQlotProject = scope.callPackage ./pkgs/build-qlot-project/default.nix {
             purifier = import (purifier + "/nix/lib") { inherit (final) lib; };
           };
         });
@@ -47,7 +47,7 @@
         native = (pkgsFor system).qlot-purifier.nativeQlot;
         native-library = (pkgsFor system).qlot-purifier.nativeQlot.library;
       });
-      lib.qlot-purifier.readLock = import ./nix/read-lock.nix { lib = nixpkgs.lib; };
+      lib.qlot-purifier = import ./lib-overlays/default { lib = nixpkgs.lib; };
       apps = forAll (system: {
         default = {
           type = "app";

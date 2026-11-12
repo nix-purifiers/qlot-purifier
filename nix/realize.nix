@@ -16,10 +16,10 @@ let
     lockFile = /. + companion;
     snapshot = /. + snapshot;
   };
-  lock = import ./read-lock.nix { inherit (pkgs) lib; } args;
+  lock = import ../lib-overlays/default/read-lock.nix { inherit (pkgs) lib; } args;
 in
 if target == "environment" then
-  pkgs.callPackage ./environment.nix {
+  pkgs.callPackage ../pkgs/build-qlot-project/environment.nix {
     inherit
       purifier
       nativeQlot
@@ -28,7 +28,7 @@ if target == "environment" then
       ;
   } { inherit lock; }
 else if target == "release" then
-  (pkgs.callPackage ./build-project.nix {
+  (pkgs.callPackage ../pkgs/build-qlot-project/default.nix {
     inherit
       purifier
       nativeQlot

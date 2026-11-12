@@ -58,10 +58,10 @@ runCommand "purified-qlot-environment"
   ''
     export PATH=${toolchain}/bin:$PATH HOME="$TMPDIR/home" XDG_CACHE_HOME="$TMPDIR/cache"
     mkdir -p "$out" "$HOME"
-    python3 ${../qlot_purifier/stage.py} ${manifest} ${nativeQlot.source}/quicklisp-client ${sources} "$out"
+    python3 ${../../qlot_purifier/stage.py} ${manifest} ${nativeQlot.source}/quicklisp-client ${sources} "$out"
     sbcl --noinform --no-userinit --no-sysinit --non-interactive --load "$out/quicklisp/setup.lisp" --load "$out/install.lisp"
-    sbcl --noinform --no-userinit --no-sysinit --non-interactive --load "$out/quicklisp/setup.lisp" --load ${../qlot_purifier/export.lisp} > "$TMPDIR/installed.tsv"
-    python3 ${../qlot_purifier/check-installed.py} ${manifest} "$TMPDIR/installed.tsv"
+    sbcl --noinform --no-userinit --no-sysinit --non-interactive --load "$out/quicklisp/setup.lisp" --load ${../../qlot_purifier/export.lisp} > "$TMPDIR/installed.tsv"
+    python3 ${../../qlot_purifier/check-installed.py} ${manifest} "$TMPDIR/installed.tsv"
     find "$out/quicklisp" -type f -exec touch -h -d @1 {} +
     export ASDF_OUTPUT_TRANSLATIONS="(:output-translations (\"$out/quicklisp/\" \"$out/fasl/\") :ignore-inherited-configuration)"
     sbcl --noinform --no-userinit --no-sysinit --non-interactive --load "$out/quicklisp/setup.lisp" --load "$out/warm.lisp"

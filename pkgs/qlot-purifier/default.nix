@@ -17,12 +17,12 @@
 stdenvNoCC.mkDerivation {
   pname = "qlot-purifier";
   version = "0.1.0";
-  src = ../.;
+  src = ../..;
   nativeBuildInputs = [ makeWrapper ];
   dontBuild = true;
   installPhase = ''
     mkdir -p "$out/bin" "$out/lib/qlot-purifier"
-    cp -r qlot_purifier nix "$out/lib/qlot-purifier/"
+    cp -r qlot_purifier nix lib-overlays pkgs "$out/lib/qlot-purifier/"
     install -m755 bin/qlot-purifier "$out/bin/qlot-purifier"
     substituteInPlace "$out/lib/qlot-purifier/nix/realize.nix" \
       --replace-fail '@nixpkgs@' '${nixpkgsSrc}' \
