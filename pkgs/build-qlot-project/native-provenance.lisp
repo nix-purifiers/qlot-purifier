@@ -1,0 +1,48 @@
+;;; Use the original SDK's TRACE reporter to observe successful native LOAD and
+;;; COMPILE-FILE operations. This is transient inspection, removed before save.
+(defvar *qlot-native-entries* (make-hash-table :test 'eq))
+(defvar *qlot-native-events* nil)
+(defun qlot-native-sha256 (file)
+  (subseq (uiop:run-program (list "sha256sum" (namestring file)) :output :string) 0 64))
+(defun qlot-native-trace-event (depth name event frame values)
+  (declare (ignore depth))
+  (case event
+    (:enter
+     (let ((file (first values)))
+       (when (typep file '(or string pathname))
+         (setf (gethash frame *qlot-native-entries*)
+               (list name (namestring (truename file)) (qlot-native-sha256 (truename file)))))))
+    (:exit
+     (let ((entry (gethash frame *qlot-native-entries*)))
+       (when (and entry (first values))
+         (let ((output (when (and (eq (first entry) 'compile-file)
+                                  (not (third values)))
+                         (truename (first values)))))
+           (push (list (first entry) (second entry)
+                       (when output (namestring output)) (third entry)
+                       (when output (qlot-native-sha256 output)))
+                 *qlot-native-events*)))
+       (remhash frame *qlot-native-entries*)))
+    (:non-local-exit (remhash frame *qlot-native-entries*))))
+
+(defun qlot-native-start-observer ()
+  (trace load :report qlot-native-trace-event
+         compile-file :report qlot-native-trace-event))
+(defun qlot-native-stop-observer ()
+  (untrace load compile-file))
+(defun qlot-native-write-events (destination)
+  (with-open-file (stream destination :direction :output :if-exists :error)
+    (write-char #\[ stream)
+    (loop for (operation source nil input-sha output-sha) in (reverse *qlot-native-events*)
+          for index from 0 do
+      (when (> index 0) (write-char #\, stream))
+      (write-string "{\"operation\":" stream)
+      (qlot-json-string (symbol-name operation) stream)
+      (write-string ",\"input\":" stream)
+      (qlot-json-string source stream)
+      (write-string ",\"inputSHA256\":" stream)
+      (qlot-json-string input-sha stream)
+      (write-string ",\"outputSHA256\":" stream)
+      (if output-sha (qlot-json-string output-sha stream) (write-string "null" stream))
+      (write-char #\} stream))
+    (write-char #\] stream)))

@@ -85,3 +85,23 @@ releases; no additional Lisp plugin is required.
 
 The purifier idea was inspired by nixcloud's
 [cargo (libnix)](https://github.com/nixcloud/cargo).
+
+
+Pass `nativeImage` to `buildQlotProject` to expose an authored C ABI through
+`packages.native-library` and its native, Python FFI, and Java FFI projections.
+Supply `source`, `bridge`, `header`, `initialize`, `exports`, and `callbacks`.
+Each callback names its Lisp package and symbol, C slot, result and arguments.
+The ABI accepts signed and unsigned 32-bit and 64-bit integers using the C names
+from `stdint.h`.
+
+Run `packages.prepare-native-image`'s `qlot-prepare-native-image NEW_DIRECTORY`,
+then set `QLOT_NATIVE_IMAGE_DIR` to the resulting absolute directory before
+initialization. The example bridge checks the compatibility marker for trusted
+local output. The preparer writes `SHA256SUMS` for local integrity verification.
+Keep the prepared directory intact for the process lifetime. See
+`examples/native-callable/README.md` for the full lifecycle requirements.
+
+The Nix package contains the shared bridge and preparation command. SBCL saves
+the application image into the caller's directory at preparation time. The raw
+image records variable GC timing data, so it is kept outside the reproducible
+package.

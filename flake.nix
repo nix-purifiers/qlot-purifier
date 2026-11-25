@@ -58,9 +58,48 @@
       checks = forAll (
         system:
         let
+          nativeProduct =
+            src:
+            (pkgsFor system).qlot-purifier.buildQlotProject {
+              inherit src;
+              nativeImage = {
+                source = "native-export.lisp";
+                bridge = "bridge.c";
+                header = "native.h";
+                initialize = "native_init";
+                exports = [
+                  "native_init"
+                  "native_answer"
+                ];
+                callbacks = [
+                  {
+                    package = "COMMON-LISP-USER";
+                    symbol = "NATIVE-ANSWER";
+                    alien = "native_answer_cb";
+                    result = "uint32_t";
+                    arguments = [ "uint32_t" ];
+                  }
+                ];
+              };
+            };
+          nativeBuild = nativeProduct ./examples/native-callable;
+          nativeRevision = nativeProduct ./examples/native-callable-revision;
           build = (pkgsFor system).qlot-purifier.buildQlotProject { src = ./examples/minimal; };
         in
         {
+          runtime-native-consumer = import ./tests/native-consumer.nix {
+            pkgs = pkgsFor system;
+            product = nativeBuild;
+            foreignPreparer = nativeRevision.packages.prepare-native-image;
+          };
+          runtime-native-revision-consumer = import ./tests/native-consumer.nix {
+            pkgs = pkgsFor system;
+            product = nativeRevision;
+            expected = 43;
+          };
+          runtime-native-projection = nativeBuild.projections.native;
+          runtime-native-library = nativeBuild.packages.native-library;
+          native-image-preparer = nativeBuild.packages.prepare-native-image;
           inherit (build.packages) environment project;
           release = build.release;
           cli = self.packages.${system}.default;
