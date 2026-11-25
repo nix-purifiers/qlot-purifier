@@ -164,6 +164,9 @@ let
         tar --sort=name --mtime=@1 --owner=0 --group=0 --numeric-owner -cf - source | gzip -n > "$out/source.tar.gz"
       '';
 in
+assert lib.assertMsg (
+  nativeImage == null || gcc.stdenv.hostPlatform.system == "x86_64-linux"
+) "Qlot nativeImage requires the pinned x86_64-linux SDK with a linkable SBCL runtime";
 assert lock.problems == [ ];
 assert lib.assertMsg (
   lock.data.toolVersions == {

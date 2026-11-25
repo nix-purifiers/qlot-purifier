@@ -87,7 +87,7 @@ The purifier idea was inspired by nixcloud's
 [cargo (libnix)](https://github.com/nixcloud/cargo).
 
 
-Pass `nativeImage` to `buildQlotProject` to expose an authored C ABI through
+On x86_64 Linux, pass `nativeImage` to `buildQlotProject` to expose an authored C ABI through
 `packages.native-library` and its native, Python FFI, and Java FFI projections.
 Supply `source`, `bridge`, `header`, `initialize`, `exports`, and `callbacks`.
 Each callback names its Lisp package and symbol, C slot, result and arguments.
@@ -105,3 +105,6 @@ The Nix package contains the shared bridge and preparation command. SBCL saves
 the application image into the caller's directory at preparation time. The raw
 image records variable GC timing data, so it is kept outside the reproducible
 package.
+
+The pinned aarch64 Linux SBCL SDK omits the linkable runtime object, so the
+native projection is currently available on x86_64 Linux.

@@ -18,7 +18,8 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - run: python3 tests/eval-errors.py
       - run: nix flake check -L
-      - run: python3 tests/native-controls.py
+      - if: matrix.runner == 'ubuntu-latest'
+        run: python3 tests/native-controls.py
       - run: python3 tests/conformance.py
       - run: python3 tests/capture.py
       - name: Rebuild the scoped SDK and project outputs
@@ -28,7 +29,11 @@ jobs:
             ".#packages.$purifier_system.native-library" \
             ".#checks.$purifier_system.environment" \
             ".#checks.$purifier_system.project" \
-            ".#checks.$purifier_system.release" \
-            ".#checks.$purifier_system.native-image-preparer" \
-            ".#checks.$purifier_system.runtime-native-library" \
-            ".#checks.$purifier_system.runtime-native-projection"
+            ".#checks.$purifier_system.release"
+      - name: Rebuild the native projection
+        if: matrix.runner == 'ubuntu-latest'
+        run: |
+          nix build --rebuild --no-link \
+            ".#checks.x86_64-linux.native-image-preparer" \
+            ".#checks.x86_64-linux.runtime-native-library" \
+            ".#checks.x86_64-linux.runtime-native-projection"

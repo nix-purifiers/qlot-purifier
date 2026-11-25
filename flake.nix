@@ -87,19 +87,6 @@
           build = (pkgsFor system).qlot-purifier.buildQlotProject { src = ./examples/minimal; };
         in
         {
-          runtime-native-consumer = import ./tests/native-consumer.nix {
-            pkgs = pkgsFor system;
-            product = nativeBuild;
-            foreignPreparer = nativeRevision.packages.prepare-native-image;
-          };
-          runtime-native-revision-consumer = import ./tests/native-consumer.nix {
-            pkgs = pkgsFor system;
-            product = nativeRevision;
-            expected = 43;
-          };
-          runtime-native-projection = nativeBuild.projections.native;
-          runtime-native-library = nativeBuild.packages.native-library;
-          native-image-preparer = nativeBuild.packages.prepare-native-image;
           inherit (build.packages) environment project;
           release = build.release;
           cli = self.packages.${system}.default;
@@ -114,6 +101,21 @@
             mkdir "$out"
             cp answer.json "$out/answer.json"
           '';
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          runtime-native-consumer = import ./tests/native-consumer.nix {
+            pkgs = pkgsFor system;
+            product = nativeBuild;
+            foreignPreparer = nativeRevision.packages.prepare-native-image;
+          };
+          runtime-native-revision-consumer = import ./tests/native-consumer.nix {
+            pkgs = pkgsFor system;
+            product = nativeRevision;
+            expected = 43;
+          };
+          runtime-native-projection = nativeBuild.projections.native;
+          runtime-native-library = nativeBuild.packages.native-library;
+          native-image-preparer = nativeBuild.packages.prepare-native-image;
         }
       );
       formatter = forAll (system: (pkgsFor system).nixfmt-tree);
