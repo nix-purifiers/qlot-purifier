@@ -4,6 +4,7 @@
   fetchgit,
   python3,
   writeText,
+  writeShellScriptBin,
   purifier,
   nativeQlot,
   toolchain,
@@ -31,6 +32,7 @@
     "sbcl --noinform --no-userinit --no-sysinit --non-interactive --load \"$out/setup.lisp\" --eval "
     + lib.escapeShellArg "(asdf:test-system ${builtins.toJSON system})",
   installCommand ? "",
+  nativeImage ? null,
   doCheck ? true,
   srcFilter ?
     path: type:
@@ -88,6 +90,62 @@ let
         ${lib.optionalString doCheck checkCommand}
         ${installCommand}
       '';
+  image =
+    import ./native-image.nix
+      {
+        inherit
+          lib
+          sbcl
+          writeShellScriptBin
+          coreutils
+          python3
+          ;
+      }
+      {
+        inherit project environment system;
+        inherit (nativeImage) source callbacks;
+      };
+  library =
+    import ./native-library.nix
+      {
+        inherit
+          lib
+          runCommand
+          writeText
+          python3
+          gcc
+          sbcl
+          ;
+      }
+      {
+        inherit project image;
+        callbackSource = nativeImage.source;
+        inherit (nativeImage)
+          callbacks
+          bridge
+          header
+          initialize
+          exports
+          ;
+      };
+  projections = lib.optionalAttrs (nativeImage != null) (
+    purifier.nativeProjections {
+      producer = library;
+      libraries.application = "lib/libapplication.so";
+      includeDirectories = [ "include" ];
+      targetMetadata.application = {
+        abi = "c";
+        inherit (nativeImage) initialize exports callbacks;
+        imagePreparer = toString image.prepare;
+        imageIdentity = image.identity;
+        originalSDK = toString sbcl;
+        runtimeContract = "One initialized image per process; same native thread; process-lifetime load; caller-owned ABI and GC roots";
+        toolVersions = lock.data.toolVersions;
+      };
+      system = gcc.stdenv.hostPlatform.system;
+      inherit runCommand python3;
+    }
+  );
   release =
     runCommand "common-lisp-project-release"
       {
@@ -106,6 +164,9 @@ let
         tar --sort=name --mtime=@1 --owner=0 --group=0 --numeric-owner -cf - source | gzip -n > "$out/source.tar.gz"
       '';
 in
+assert lib.assertMsg (
+  nativeImage == null || gcc.stdenv.hostPlatform.system == "x86_64-linux"
+) "Qlot nativeImage requires the pinned x86_64-linux SDK with a linkable SBCL runtime";
 assert lock.problems == [ ];
 assert lib.assertMsg (
   lock.data.toolVersions == {
@@ -119,8 +180,12 @@ assert lib.assertMsg (
   packages = {
     default = project;
     inherit project environment;
+  }
+  // lib.optionalAttrs (nativeImage != null) {
+    prepare-native-image = image.prepare;
+    native-library = library;
   };
   tests = project;
-  inherit release;
+  inherit release projections;
   fetches = lock.entries;
 }

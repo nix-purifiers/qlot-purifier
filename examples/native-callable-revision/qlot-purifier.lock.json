@@ -1,0 +1,126 @@
+{
+  "dists": [
+    {
+      "files": {
+        "distinfo.txt": {
+          "path": "metadata/quicklisp/distinfo.txt"
+        },
+        "releases.txt": {
+          "path": "metadata/quicklisp/releases.txt"
+        },
+        "systems.txt": {
+          "path": "metadata/quicklisp/systems.txt"
+        }
+      },
+      "name": "quicklisp",
+      "version": "2026-01-01"
+    },
+    {
+      "files": {
+        "distinfo.txt": {
+          "content": "name: yason\nversion: ql-2026-01-01\ndistinfo-subscription-url: qlot://localhost/yason.txt\ncanonical-distinfo-url: qlot://localhost/yason.txt\nrelease-index-url: qlot://localhost/yason/ql-2026-01-01/releases.txt\nsystem-index-url: qlot://localhost/yason/ql-2026-01-01/systems.txt\n",
+          "sha256": "e8ec54a1b24bec1cbb032abddddeae85b6cd57ab10465403fb1d1e30d993662c"
+        },
+        "releases.txt": {
+          "content": "# project url size file-md5 content-sha1 prefix [system-file1..system-fileN]\nyason http://beta.quicklisp.org/archive/yason/2025-06-22/yason-20250622-git.tgz 31621 24630ef3aacbded4ad5bfe1a234dfb14 6f6a5e6ef39f2f4971c4a9539272fab72c71cf67 yason-20250622-git yason-tests.asd yason.asd\n",
+          "sha256": "20e3724d7fadc3fdee3af0892c48da1f1e8606107741e596bbe97fb24a10e3d9"
+        },
+        "systems.txt": {
+          "content": "# project system-file system-name [dependency1..dependencyN]\nyason yason yason alexandria asdf trivial-gray-streams\nyason yason-tests yason-tests asdf unit-test yason\n",
+          "sha256": "07e93dd9bbd27b59600f5b582ad457e238664bfd4114c94a9d71ce5683f309e8"
+        }
+      },
+      "name": "yason",
+      "version": "ql-2026-01-01"
+    }
+  ],
+  "entries": [
+    {
+      "hash": "sha256-3N/FusIpqVI1jf5mHwhg6KAkgOQG0Nld7kMAzcPUWzE=",
+      "mirrors": [],
+      "path": "archives/quicklisp/alexandria-20241012-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/alexandria/2024-10-12/alexandria-20241012-git.tgz"
+    },
+    {
+      "hash": "sha256-vnwz6C/cj0g0uTtpffmKOwZIbmSSkohB3Ca7gk0JHMo=",
+      "mirrors": [],
+      "path": "archives/quicklisp/trivial-gray-streams-20241012-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/trivial-gray-streams/2024-10-12/trivial-gray-streams-20241012-git.tgz"
+    },
+    {
+      "hash": "sha256-sIZUDSPpfZiY47C7VrM50epV7vBNhAe8fbCjG1CqX1s=",
+      "mirrors": [],
+      "path": "archives/yason/yason-20250622-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/yason/2025-06-22/yason-20250622-git.tgz"
+    },
+    {
+      "hash": "sha256-/ENut1gsi2ny7IfXe9qkCHUCMo3sCfIcV214+si/XhU=",
+      "mirrors": [],
+      "path": "metadata/quicklisp/distinfo.txt",
+      "url": "https://beta.quicklisp.org/dist/quicklisp/2026-01-01/distinfo.txt"
+    },
+    {
+      "hash": "sha256-nK1ZOY52ADLeAFPK/P3PFutDfK8aINZWaKjjtyZIXaQ=",
+      "mirrors": [],
+      "path": "metadata/quicklisp/releases.txt",
+      "url": "https://beta.quicklisp.org/dist/quicklisp/2026-01-01/releases.txt"
+    },
+    {
+      "hash": "sha256-y4MJMhhAiHtUL6hT3E/pX5pOotfKAoxSHTK2fSvfUcc=",
+      "mirrors": [],
+      "path": "metadata/quicklisp/systems.txt",
+      "url": "https://beta.quicklisp.org/dist/quicklisp/2026-01-01/systems.txt"
+    }
+  ],
+  "extraInputs": [],
+  "inputs": {
+    "purifier-example.asd": {
+      "content": "(asdf:defsystem \"purifier-example\"\n  :version \"0.1.0\"\n  :depends-on (\"yason\")\n  :serial t\n  :components ((:file \"example\"))\n  :in-order-to ((test-op (load-op \"purifier-example\")))\n  :perform (test-op (operation component)\n             (unless (search \"\\\"answer\\\":42\"\n                             (uiop:symbol-call :purifier-example :serialized))\n               (error \"Locked JSON round trip failed\"))))\n",
+      "sha256": "7fd7b65cec283de1014534a493de5b58821f8c645a5889bf77e3cc2a6bf1619a"
+    },
+    "qlfile": {
+      "content": "ql yason\n",
+      "sha256": "66223e53657cbb4a94ff2f00279c80f97338d59b9eabb12d9577cd83a53a0e13"
+    }
+  },
+  "nativeLock": {
+    "content": "(\"quicklisp\" .\n (:class qlot/source/dist:source-dist\n  :initargs (:distribution \"https://beta.quicklisp.org/dist/quicklisp.txt\" :%version :latest)\n  :version \"2026-01-01\"))\n(\"yason\" .\n (:class qlot/source/ql:source-ql\n  :initargs (:%version :latest)\n  :version \"ql-2026-01-01\"))\n",
+    "sha256": "b53da965f0ace56ff39c86aced01c4868c443ad511ac5f82c90b57f290dc1c9e"
+  },
+  "purifier": "qlot",
+  "releases": [
+    {
+      "dist": "quicklisp",
+      "filename": "alexandria-20241012-git.tgz",
+      "name": "alexandria",
+      "path": "archives/quicklisp/alexandria-20241012-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/alexandria/2024-10-12/alexandria-20241012-git.tgz"
+    },
+    {
+      "dist": "quicklisp",
+      "filename": "trivial-gray-streams-20241012-git.tgz",
+      "name": "trivial-gray-streams",
+      "path": "archives/quicklisp/trivial-gray-streams-20241012-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/trivial-gray-streams/2024-10-12/trivial-gray-streams-20241012-git.tgz"
+    },
+    {
+      "dist": "yason",
+      "filename": "yason-20250622-git.tgz",
+      "name": "yason",
+      "path": "archives/yason/yason-20250622-git.tgz",
+      "url": "https://beta.quicklisp.org/archive/yason/2025-06-22/yason-20250622-git.tgz"
+    }
+  ],
+  "systems": [
+    "alexandria",
+    "trivial-gray-streams",
+    "yason"
+  ],
+  "toolVersions": {
+    "gcc": "16.2.0",
+    "qlot": "1.5.2",
+    "sbcl": "2.6.8",
+    "sdk": "5060c1b99013759f33ae80927a00ce5f989d11f41668a1a73c2de366adad4381"
+  },
+  "version": 1
+}
